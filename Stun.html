@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>STUN Server Test</title>
+</head>
+<body>
+    <h1>STUN Server Test</h1>
+    <pre id="log"></pre>
+
+    <script>
+        let pc = new RTCPeerConnection({
+            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+        });
+
+        pc.onicecandidate = (event) => {
+            if (event.candidate) {
+                log(`New ICE candidate: ${JSON.stringify(event.candidate)}`);
+            } else {
+                log("All ICE candidates have been sent");
+            }
+        };
+
+        pc.oniceconnectionstatechange = () => {
+            log(`ICE connection state: ${pc.iceConnectionState}`);
+        };
+
+        function log(message) {
+            document.getElementById('log').textContent += `${message}\n`;
+        }
+
+        pc.createDataChannel("test");
+        pc.createOffer()
+            .then(offer => pc.setLocalDescription(offer))
+            .then(() => log("Offer created and set as local description"))
+            .catch(error => log(`Failed to create offer: ${error}`));
+    </script>
+</body>
+</html>
