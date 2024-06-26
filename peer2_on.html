@@ -7,7 +7,9 @@
     <h1>WebRTC Peer 2</h1>
     <textarea id="offer" cols="60" rows="10" placeholder="Paste Offer SDP here"></textarea><br>
     <textarea id="answer" cols="60" rows="10" placeholder="Answer SDP will appear here"></textarea><br>
+    <textarea id="candidate" cols="60" rows="10" placeholder="Paste ICE Candidate here"></textarea><br>
     <button onclick="startConnection()">Start Connection</button>
+    <button onclick="addIceCandidate()">Add ICE Candidate</button>
     <textarea id="message" cols="60" rows="3" placeholder="Type message here"></textarea><br>
     <button onclick="sendMessage()">Send Message</button>
     <pre id="log"></pre>
@@ -37,9 +39,7 @@
 
         pc.onicecandidate = (event) => {
             if (event.candidate) {
-                console.log(event.candidate);
-            } else {
-                document.getElementById('answer').value = JSON.stringify(pc.localDescription);
+                log(`New ICE candidate: ${JSON.stringify(event.candidate)}`);
             }
         };
 
@@ -49,7 +49,17 @@
                 .then(() => log("Offer set as remote description"))
                 .then(() => pc.createAnswer())
                 .then(answer => pc.setLocalDescription(answer))
-                .then(() => log("Answer created and set as local description"));
+                .then(() => {
+                    document.getElementById('answer').value = JSON.stringify(pc.localDescription);
+                    log("Answer created and set as local description");
+                });
+        }
+
+        function addIceCandidate() {
+            let candidate = JSON.parse(document.getElementById('candidate').value);
+            pc.addIceCandidate(new RTCIceCandidate(candidate))
+                .then(() => log("ICE candidate added"))
+                .catch(e => log(`Failed to add ICE candidate: ${e}`));
         }
 
         function log(message) {
