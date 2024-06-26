@@ -30,10 +30,24 @@
             log(`Received message: ${event.data}`);
         };
 
+        dataChannel.onerror = (error) => {
+            log(`Data channel error: ${error}`);
+        };
+
         pc.onicecandidate = (event) => {
             if (event.candidate) {
                 log(`New ICE candidate: ${JSON.stringify(event.candidate)}`);
+            } else {
+                log("All ICE candidates have been sent");
             }
+        };
+
+        pc.oniceconnectionstatechange = () => {
+            log(`ICE connection state: ${pc.iceConnectionState}`);
+        };
+
+        pc.onconnectionstatechange = () => {
+            log(`Connection state: ${pc.connectionState}`);
         };
 
         function startConnection() {
@@ -42,13 +56,15 @@
                 .then(() => {
                     document.getElementById('offer').value = JSON.stringify(pc.localDescription);
                     log("Offer created and set as local description");
-                });
+                })
+                .catch(error => log(`Failed to create offer: ${error}`));
         }
 
         function setAnswer() {
             let answer = JSON.parse(document.getElementById('answer').value);
             pc.setRemoteDescription(new RTCSessionDescription(answer))
-                .then(() => log("Answer set as remote description"));
+                .then(() => log("Answer set as remote description"))
+                .catch(error => log(`Failed to set remote description: ${error}`));
         }
 
         function addIceCandidate() {
