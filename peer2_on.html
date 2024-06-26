@@ -30,6 +30,10 @@
                 log(`Received message: ${event.data}`);
             };
 
+            dataChannel.onerror = (error) => {
+                log(`Data channel error: ${error}`);
+            };
+
             window.sendMessage = () => {
                 let message = document.getElementById('message').value;
                 dataChannel.send(message);
@@ -40,7 +44,17 @@
         pc.onicecandidate = (event) => {
             if (event.candidate) {
                 log(`New ICE candidate: ${JSON.stringify(event.candidate)}`);
+            } else {
+                log("All ICE candidates have been sent");
             }
+        };
+
+        pc.oniceconnectionstatechange = () => {
+            log(`ICE connection state: ${pc.iceConnectionState}`);
+        };
+
+        pc.onconnectionstatechange = () => {
+            log(`Connection state: ${pc.connectionState}`);
         };
 
         function startConnection() {
@@ -52,7 +66,8 @@
                 .then(() => {
                     document.getElementById('answer').value = JSON.stringify(pc.localDescription);
                     log("Answer created and set as local description");
-                });
+                })
+                .catch(error => log(`Failed to create answer: ${error}`));
         }
 
         function addIceCandidate() {
