@@ -17,3 +17,8 @@ https://skillfulelectro.github.io/WebRTC_Tests/peer2_on.html
 
 
 https://skillfulelectro.github.io/WebRTC_Tests/Stun.html
+
+
+
+by michal-wrzosek :
+https://skillfulelectro.github.io/WebRTC_Tests/test.html
