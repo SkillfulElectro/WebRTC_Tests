@@ -7,17 +7,20 @@
     <h1>WebRTC Peer 1</h1>
     <textarea id="offer" cols="60" rows="10" placeholder="Offer SDP will appear here"></textarea><br>
     <textarea id="answer" cols="60" rows="10" placeholder="Paste Answer SDP here"></textarea><br>
-    <textarea id="candidate" cols="60" rows="10" placeholder="Paste ICE Candidate here"></textarea><br>
+    <textarea id="candidates" cols="60" rows="10" placeholder="Paste ICE Candidates here, one per line"></textarea><br>
     <button onclick="startConnection()">Start Connection</button>
     <button onclick="setAnswer()">Set Answer</button>
-    <button onclick="addIceCandidate()">Add ICE Candidate</button>
+    <button onclick="addIceCandidates()">Add ICE Candidates</button>
     <textarea id="message" cols="60" rows="3" placeholder="Type message here"></textarea><br>
     <button onclick="sendMessage()">Send Message</button>
     <pre id="log"></pre>
 
     <script>
         let pc = new RTCPeerConnection({
-            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'turn:relay.metered.ca:80', username: 'open', credential: 'open' }
+            ]
         });
 
         let dataChannel = pc.createDataChannel("chat");
@@ -67,11 +70,22 @@
                 .catch(error => log(`Failed to set remote description: ${error}`));
         }
 
-        function addIceCandidate() {
-            let candidate = JSON.parse(document.getElementById('candidate').value);
-            pc.addIceCandidate(new RTCIceCandidate(candidate))
-                .then(() => log("ICE candidate added"))
-                .catch(e => log(`Failed to add ICE candidate: ${e}`));
+        function addIceCandidates() {
+            let candidatesStr = document.getElementById('candidates').value;
+            let candidates = candidatesStr.split('\n');
+            for (let candidateStr of candidates) {
+                let candidate;
+                try {
+                    candidate = JSON.parse(candidateStr);
+                } catch (e) {
+                    log(`Failed to parse ICE candidate: ${e}`);
+                    continue;
+                }
+
+                pc.addIceCandidate(new RTCIceCandidate(candidate))
+                    .then(() => log("ICE candidate added"))
+                    .catch(e => log(`Failed to add ICE candidate: ${e}`));
+            }
         }
 
         function sendMessage() {
@@ -82,6 +96,7 @@
 
         function log(message) {
             document.getElementById('log').textContent += `${message}\n`;
+            console.log(message); // Log to browser console for more detailed debugging
         }
     </script>
 </body>
