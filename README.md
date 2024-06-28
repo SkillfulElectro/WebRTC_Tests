@@ -1,5 +1,5 @@
 # WebRTC_Tests
-Simple Website to Test WebRTC
+This repo is just for tests about how WebRTC works
 
 https://skillfulelectro.github.io/WebRTC_Tests/peer1.html
 
